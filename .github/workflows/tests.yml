@@ -1,6 +1,9 @@
 name: Testing fastapi_cicd
 
-on: push
+on:
+  push:
+    tags:
+    - v*
 
 jobs:
   black:
