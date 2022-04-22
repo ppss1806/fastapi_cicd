@@ -1,0 +1,71 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+    image: fastapi_cicd:${FASTAPI_CICD_VERSION:-latest}
+    restart: always
+    env_file:
+    - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      FASTAPI_CICD_HOST: 0.0.0.0
+      FASTAPI_CICD_DB_HOST: fastapi_cicd-db
+      FASTAPI_CICD_DB_PORT: 5432
+      FASTAPI_CICD_DB_USER: fastapi_cicd
+      FASTAPI_CICD_DB_PASS: fastapi_cicd
+      FASTAPI_CICD_DB_BASE: fastapi_cicd
+  db:
+    image: postgres:13.6-bullseye
+    hostname: fastapi_cicd-db
+    environment:
+      POSTGRES_PASSWORD: "fastapi_cicd"
+      POSTGRES_USER: "fastapi_cicd"
+      POSTGRES_DB: "fastapi_cicd"
+    volumes:
+    - fastapi_cicd-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: pg_isready -U fastapi_cicd
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+
+
+  migrator:
+    image: fastapi_cicd:${FASTAPI_CICD_VERSION:-latest}
+    restart: "no"
+    command: alembic upgrade head
+    environment:
+      FASTAPI_CICD_DB_HOST: fastapi_cicd-db
+      FASTAPI_CICD_DB_PORT: 5432
+      FASTAPI_CICD_DB_USER: fastapi_cicd
+      FASTAPI_CICD_DB_PASS: fastapi_cicd
+      FASTAPI_CICD_DB_BASE: fastapi_cicd
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: bitnami/redis:6.2.5
+    hostname: fastapi_cicd-redis
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+
+volumes:
+  fastapi_cicd-db-data:
+    name: fastapi_cicd-db-data
