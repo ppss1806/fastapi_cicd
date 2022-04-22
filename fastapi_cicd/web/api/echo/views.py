@@ -16,3 +16,14 @@ async def send_echo_message(
     :returns: message same as the incoming.
     """
     return incoming_message
+
+
+@router.get("/")
+async def echo_hello_world() -> Message:
+    """
+    Say hi to user.
+
+    :param
+    :returns: message same as the incoming.
+    """
+    return Message(message="hello world")
