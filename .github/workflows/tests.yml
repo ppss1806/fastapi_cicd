@@ -3,7 +3,7 @@ name: Testing fastapi_cicd
 on:
   push:
     tags:
-    - v*
+    - v1.*
 
 jobs:
   black:
