@@ -30,7 +30,7 @@ jobs:
 
     - name: Push image
       run: |
-        IMAGE_ID=libra146/$IMAGE_NAME
+        IMAGE_ID=ppss1806/$IMAGE_NAME
 
         IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
